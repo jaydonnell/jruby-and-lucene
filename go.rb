@@ -1,9 +1,6 @@
 require 'java'
 require 'lib/lucene-core-3.1.0.jar'
 
-require 'rubygems'
-require 'pry'
-
 module Lucene
   module Store
     include_package 'org.apache.lucene.store'
@@ -18,15 +15,22 @@ module Lucene
     include_package 'org.apache.lucene.search'
   end
 
+  module TokenAttributes
+    include_package 'org.apache.lucene.analysis.tokenattributes'
+  end
+
   StandardTokenizer = org.apache.lucene.analysis.standard.StandardTokenizer
   Version = org.apache.lucene.util.Version
 end
 
-binding.pry
-
-# Tokenization
+# Tokenization (This is hideous, it's lucene's fault)
+puts 'Tokens'
 t = Lucene::StandardTokenizer.new(Lucene::Version::LUCENE_CURRENT, java.io.StringReader.new("I am 127.0.0.1"))
-
+charTermAttribute = t.getAttribute Lucene::TokenAttributes::CharTermAttribute.java_class
+while t.incrementToken
+  puts charTermAttribute.to_s
+end
+puts
 
 # Create an index and add some documents to the index
 index = Lucene::Store::FSDirectory.open(java.io.File.new('test.index'))
